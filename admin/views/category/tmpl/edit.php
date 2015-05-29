@@ -1,8 +1,7 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
@@ -16,8 +15,6 @@ JHtml::_('behavior.keepalive');
 
 // Define slides options
 $slidesOptions = array(
-		"active" => "slide1",
-		"useCookie" => "true" // It is the ID of the active tab.
 );
 ?>
 
@@ -34,11 +31,10 @@ $slidesOptions = array(
 		}
 	}
 </script>
-
+		
 <form action="<?php echo JRoute::_('index.php?option=com_jem&layout=edit&id='.(int) $this->item->id); ?>" method="post" name="adminForm" id="item-form" class="form-validate">
 <div class="form-horizontal">	
 	<div class="span12">
-	
 	
 <!-- Tabs -->	
 	<div class="span8">

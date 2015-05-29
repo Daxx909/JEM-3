@@ -1,55 +1,65 @@
 <?php
 /**
- * @package My Attending
- * @version JEM v1.9.5 & CB 1.9
+ * @package JEM
+ * @subpackage CB-Plugin: MyAttending
  * @author JEM Community
- * @copyright (C) 2013-2013 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  *
  * Just a note:
  * Keep the query code inline with my-attendances view
  *
  */
+defined('_JEXEC') or die;
 
-if (! (defined('_VALID_CB') || defined('_JEXEC') || defined('_VALID_MOS')))
+include_once JPATH_SITE . '/components/com_jem/classes/image.class.php';
+include_once JPATH_SITE . '/components/com_jem/classes/output.class.php';
+include_once JPATH_SITE . '/components/com_jem/classes/Zebra_Image.php';
+include_once JPATH_SITE . '/components/com_jem/helpers/helper.php';
+include_once JPATH_SITE . '/components/com_jem/helpers/route.php';
+
+
+public class JemMyAttendingTab extends cbTabHandler
 {
-	die();
-}
+    protected $jemFound = false;
 
-require_once (JPATH_SITE.'/components/com_jem/classes/image.class.php');
-require_once (JPATH_SITE.'/components/com_jem/classes/output.class.php');
-require_once (JPATH_SITE.'/components/com_jem/classes/Zebra_Image.php');
-require_once (JPATH_SITE.'/components/com_jem/helpers/helper.php');
-require_once (JPATH_SITE.'/components/com_jem/helpers/route.php');
+    /**
+     * JEM Attending tab
+     */
+    function __construct()
+    {
+        // Check if JEM is installed.
+        $this->jemFound = class_exists('JemImage') && class_exists('JemOutput') && class_exists('JemHelperRoute');
 
-
-class jemmyattendingTab extends cbTabHandler {
-	/* JEM Attending tab
-	 */
-	function __construct()
-	{
-		$this->cbTabHandler();
-	}
+        $this->cbTabHandler();
+    }
 
 
-	/**
-	 * Retrieve the languagefile
-	 * The file is located in the folder language
-	 */
-	function _getLanguageFile() {
-		global $_CB_framework;
-		$UElanguagePath=$_CB_framework->getCfg('absolute_path').'/components/com_comprofiler/plugin/user/plug_cbjemmyattending';
-		if (file_exists($UElanguagePath.'/language/'.$_CB_framework->getCfg('lang').'.php')) {
-			include_once($UElanguagePath.'/language/'.$_CB_framework->getCfg('lang').'.php');
-		} else include_once($UElanguagePath.'/language/english.php');
-	}
+    /**
+     * Retrieve the languagefile
+     * The file is located in the folder language
+     */
+    public function _getLanguageFile() {
+        global $_CB_framework;
+
+        $UElanguagePath=$_CB_framework->getCfg('absolute_path') . '/components/com_comprofiler/plugin/user/plug_cbjemmyattending';
+        if (file_exists($UElanguagePath . '/language/'.$_CB_framework->getCfg('lang') . '.php')) {
+            include_once($UElanguagePath . '/language/'.$_CB_framework->getCfg('lang') . '.php');
+        } else {
+			include_once($UElanguagePath . '/language/english.php');
+		}
+    }
 
 
 	/**
 	 * Display Tab
 	 */
-	function getDisplayTab($tab,$user,$ui) {
+	public function getDisplayTab($tab,$user,$ui) {
 		/* loading global variables */
-		global $_CB_database,$_CB_framework;
+		global $_CB_database, $_CB_framework;
+
+		if (!$this->jemFound) {
+			return '';
+		}
 
 		/* loading the language function */
 		self::_getLanguageFile();
@@ -68,16 +78,44 @@ class jemmyattendingTab extends cbTabHandler {
 		/* message at the bottom of the table */
 		$event_tab_message = $params->get('hwTabMessage', "");
 
-		/* load css */
-		$_CB_framework->addCustomHeadTag("<link href=\"".$_CB_framework->getCfg('live_site')."/components/com_comprofiler/plugin/user/plug_cbjemmyattending/jemmyattending_cb.css\" rel=\"stylesheet\" type=\"text/css\" />");
+		/* access rights check */
+		// retrieval user parameters
+		$userid = $user->id;
 
-		/* check for tabdescription */
-		if ($tab->description == null)
+		// $user is profile's owner but we need logged-in user here
+		$juser = JFactory::getUser();
+
+		if ($juser->id != $userid)
 		{
-			$tabdescription = "_JEMMYATTENDING_NO_DESCRIPTION";
-		} else {
-			$tabdescription = $tab->description;
+			// we have to check if foreign announces are allowed to show
+			$permitted = false;
+			$settings = JEMHelper::globalattribs();
+
+			switch ($settings->get('event_show_attendeenames', 2))
+			{
+				case 0: // show to none
+				default:
+					break;
+				case 1: // show to admins
+					$permitted = $juser->authorise('core.manage', 'com_jem');
+					break;
+				case 2: // show to registered
+					$permitted = !$juser->get('guest');
+					break;
+				case 3: // show to all
+					$permitted = true;
+					break;
+			}
+
+			if (!$permitted)
+			{
+				return ''; // which will completely hide the tab
+			}
 		}
+
+		/* load css */
+		//$_CB_framework->addCustomHeadTag("<link href=\"".$_CB_framework->getCfg('live_site')."/components/com_comprofiler/plugin/user/plug_cbjemmyattending/jemmyattending_cb.css\" rel=\"stylesheet\" type=\"text/css\" />");
+		$_CB_framework->document->addHeadStyleSheet($_CB_framework->getCfg('live_site') . '/components/com_comprofiler/plugin/user/plug_cbjemmyattending/jemmyattending_cb.css');
 
 		/*
 		 * Tab description
@@ -86,8 +124,11 @@ class jemmyattendingTab extends cbTabHandler {
 		 * can be filled in the backend, section: Tab management
 		 */
 
-		// html content is allowed in descriptions
-		$return .= "\t\t<div class=\"tab_Description\">". $tabdescription. "</div>\n";
+		if (!empty($tab->description))
+		{
+			// html content is allowed in descriptions
+			$return .= "\t\t<div class=\"tab_Description\">" . $tab->description . "</div>\n";
+		}
 
 		/*
 		 * Check if gd is enabled, for thumbnails
@@ -110,17 +151,16 @@ class jemmyattendingTab extends cbTabHandler {
 		$query = "SELECT `id` FROM `#__menu` WHERE `link` LIKE '%index.php?option=com_jem&view=eventslist%' AND `type` = 'component' AND `published` = '1' LIMIT 1";
 		$_CB_database->setQuery($query);
 
+		/*
 		$S_Itemid= $_CB_database->loadResult();
 
-		if(!$S_Itemid) {
+		if(!$S_Itemid)
+		{
 			$S_Itemid = 999999;
 		}
+		*/
 
-		// retrieval user parameters
-		$userid = $user->id;
-
-		// Support Joomla access levels instead of single group id
-		$juser = JFactory::getUser($userid);
+		// Support Joomla access levels instead of single group id; $juser is the asking user
 		$levels = $juser->getAuthorisedViewLevels();
 
 		/*
@@ -140,8 +180,9 @@ class jemmyattendingTab extends cbTabHandler {
 				. ' LEFT JOIN #__jem_venues AS l ON l.id = a.locid '
 				. ' LEFT JOIN #__jem_cats_event_relations AS rel ON rel.itemid = a.id '
 				. ' LEFT JOIN #__jem_categories AS c ON c.id = rel.catid '
-				. ' WHERE a.published = 1 AND c.published = 1 AND r.uid = '.$userid.' AND c.access IN (' . implode(',', $levels) . ')'
-				. ' AND DATE_SUB(NOW(), INTERVAL 1 DAY) < (IF (a.enddates IS NOT NULL, a.enddates, a.dates))'
+				. ' WHERE a.published = 1 AND c.published = 1 AND r.uid = ' . $userid . ' AND c.access IN (' . implode(',', $levels) . ')'
+				. ' AND (a.dates IS NULL OR DATE_SUB(NOW(), INTERVAL 1 DAY) < (IF (a.enddates IS NOT NULL, a.enddates, a.dates)))'
+				. ' GROUP BY a.id'
 				. ' ORDER BY a.dates, a.times'
 				;
 		$_CB_database->setQuery($query);
@@ -176,28 +217,28 @@ class jemmyattendingTab extends cbTabHandler {
 		$return .= "\n\t\t\t</th>";
 
 		/* Description header */
-		if ($event_description==1) {
+		if ($event_description == 1) {
 			$return .= "\n\t\t\t<th class='jemmyattendingCBTabTableDesc'>";
 			$return .= "\n\t\t\t\t" . _JEMMYATTENDING_DESC;
 			$return .= "\n\t\t\t</th>";
 		}
 
 		/* City header */
-		if ($event_venue==1) {
+		if ($event_venue == 1) {
 			$return .= "\n\t\t\t<th class='jemmyattendingCBTabTableVenue'>";
 			$return .= "\n\t\t\t\t" . _JEMMYATTENDING_CITY;
 			$return .= "\n\t\t\t</th>";
 		}
 
 		/* Startdate header */
-		if ($event_startdate==1) {
+		if ($event_startdate == 1) {
 			$return .= "\n\t\t\t<th class='jemmyattendingCBTabTableStart'>";
 			$return .= "\n\t\t\t\t" . _JEMMYATTENDING_START;
 			$return .= "\n\t\t\t</th>";
 		}
 
 		/* Enddate header */
-		if ($event_enddate==1) {
+		if ($event_enddate == 1) {
 			$return .= "\n\t\t\t<th class='jemmyattendingCBTabTableExp'>";
 			$return .= "\n\t\t\t\t" . _JEMMYATTENDING_EXPIRE;
 			$return .= "\n\t\t\t</th>";
@@ -211,8 +252,8 @@ class jemmyattendingTab extends cbTabHandler {
 		 * If data is available start with the rows
 		 */
 		$entryCount = 0;
-		if(count($results)) {
-			foreach($results as $result) {
+		if (count($results)) {
+			foreach ($results as $result) {
 				$entryCount++;
 
 				/* Variables */
@@ -226,7 +267,7 @@ class jemmyattendingTab extends cbTabHandler {
 				 * this is for the coloring of the rows
 				 * The variable has been added to the tr of the rows
 			 	 */
-				$CSSClass = $entryCount%2 ? "row0" : "row1";
+				$CSSClass = $entryCount %2 ? "row0" : "row1";
 
 				/*
 				 * Start of rowline
@@ -238,7 +279,7 @@ class jemmyattendingTab extends cbTabHandler {
 
 				/* Title field */
 				$return .= "\n\t\t\t<td class='jemmyattendingCBTabTableTitle'>";
-				$return .= "\n\t\t\t\t<a href=\"". JRoute::_(JEMHelperRoute::getEventRoute($result->eventid)) ."\">{$result->title}</a>";
+				$return .= "\n\t\t\t\t<a href=\"" . JRoute::_(JEMHelperRoute::getEventRoute($result->eventid)) . "\">{$result->title}</a>";
 				$return .= "\n\t\t\t</td>";
 
 
@@ -248,7 +289,7 @@ class jemmyattendingTab extends cbTabHandler {
 				 * the max length is specified
 				 * the (...) is being added behind the description, also with small descriptions
 				 */
-				if ($event_description==1) {
+				if ($event_description == 1) {
 					$description = substr($result->text,0,150);
 					$return .= "\n\t\t\t<td class='jemmyattendingCBTabTableDesc'>";
 					$return .= "\n\t\t\t\t{$description} (...)";
@@ -259,15 +300,18 @@ class jemmyattendingTab extends cbTabHandler {
 				 *
 				 * a link to the venueevent is specified so people can visit the venue page
 				 */
-				if ($event_venue==1) {
-					$location = "<a href='".JRoute::_(JEMHelperRoute::getVenueRoute($result->locid))."'>{$result->venue}</a>";
+				if ($event_venue == 1) {
+					$location = "<a href='" . JRoute::_(JEMHelperRoute::getVenueRoute($result->locid)) . "'>{$result->venue}</a>";
 					$return .= "\n\t\t\t<td class='jemmyattendingCBTabTableVenue'>";
-					$return .= "\n\t\t\t\t$location <small style='font-style:italic;'>- {$result->city}</small>";
+					$return .= "\n\t\t\t\t$location";
+					if (!empty($result->city)) {
+						$return .= "<small style='font-style:italic;'> - {$result->city}</small>";
+					}
 					$return .= "\n\t\t\t</td>";
 				}
 
 				/* Startdate field */
-				if ($event_startdate==1) {
+				if ($event_startdate == 1) {
 					$startdate2 =	JEMOutput::formatdate($result->dates, $settings[0]->formatShortDate);
 					$return .= "\n\t\t\t<td class='jemmyattendingCBTabTablestart'>";
 					$return .= "\n\t\t\t\t{$startdate2}";
@@ -278,7 +322,7 @@ class jemmyattendingTab extends cbTabHandler {
 				 * Enddate
 				 * if no enddate is given nothing will show up
 				 */
-				if ($event_enddate==1) {
+				if ($event_enddate == 1) {
 					$enddate2 =	JEMOutput::formatdate($result->enddates, $settings[0]->formatShortDate);
 					$return .= "\n\t\t\t<td class='jemmyattendingCBTabTableExp'>";
 					$return .= "\n\t\t\t\t{$enddate2}";
@@ -293,7 +337,7 @@ class jemmyattendingTab extends cbTabHandler {
 			// When no data has been found the user will see a message
 
 			/* display no listings */
-			$return .= _JEMMYATTENDING_NO_LISTING;
+			$return .= '<tr><td class="jemmyattendingCBTabTableTitle" span="9">'._JEMMYATTENDING_NO_LISTING.'</td></tr>'; // TODO. set the right colspan or rowspan
 		}
 
 		/* closing tag of the table */
@@ -308,7 +352,7 @@ class jemmyattendingTab extends cbTabHandler {
 		 * At the top we did specify the variable
 		 * but not sure where we can fill it
 		 */
-		$return .= "\t\t<div>\n<p>". htmlspecialchars($event_tab_message). "</p></div>\n";
+		$return .= "\t\t<div>\n<p>" . htmlspecialchars($event_tab_message) . "</p></div>\n";
 
 		/*
 		 * Showing the code
@@ -319,4 +363,3 @@ class jemmyattendingTab extends cbTabHandler {
 		return $return;
 	}
 }
-?>

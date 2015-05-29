@@ -1,8 +1,7 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
@@ -97,7 +96,7 @@ $admin = $this->admin;
 		<?php else : ?>
 			<?php $this->rows = $this->getRows(); ?>
 			<?php foreach ($this->rows as $row) : ?>
-			
+
 			<?php
 			$params		= $row->params;
 			$images 	= json_decode($row->datimage);
@@ -105,7 +104,7 @@ $admin = $this->admin;
 			$user		= JFactory::getUser();
 			$attribs 	= json_decode($row->attribs);
 			?>
-			
+
 				<?php if (!empty($row->featured)) :   ?>
 				<tr class="featured featured<?php echo $row->id.$this->params->get('pageclass_sfx'); ?>" itemscope="itemscope" itemtype="http://schema.org/Event" >
 				<?php else : ?>
@@ -131,6 +130,19 @@ $admin = $this->admin;
 							$row->enddates, $row->endtimes);
 					?>
 				</td>
+				<?php if (($this->jemsettings->showtitle == 1) && ($this->jemsettings->showdetails == 2)) : ?>
+				<?php if ($this->escape($row->introtext) != "" ) { ?>
+					<td class="jem_title">
+						<a href="<?php echo JRoute::_(JemHelperRoute::getEventRoute($row->slug)); ?>" itemprop="url">
+							<span itemprop="name"><?php echo $this->escape($row->title); ?></span>
+						</a>
+					</td>
+				<?php } else { ?>
+				<td class="jem_title" itemprop="name">
+						<?php echo $this->escape($row->title); ?>
+					</td>
+				<?php } ?>
+				<?php endif; ?>
 
 				<?php if (($this->jemsettings->showtitle == 1) && ($this->jemsettings->showdetails == 1)) : ?>
 					<td class="jem_title">
@@ -170,12 +182,12 @@ $admin = $this->admin;
 				<?php endif; ?>
 
 				<?php if ($this->jemsettings->showatte == 1) : ?>
-					<td class="jem_attendees">
+					<td class="jem_attendees center">
 						<?php echo !empty($row->regCount) ? $this->escape($row->regCount) : '-'; ?>
 					</td>
 				<?php endif; ?>
 				<?php if ($admin && !$print) { ?>
-					<td class="jem_edit">
+					<td class="jem_edit center">
 						<?php echo JemOutput::editbutton($row, $params, $attribs, true, 'eventslist'); ?>
 					</td>
 				<?php } ?>

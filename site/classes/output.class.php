@@ -1,13 +1,11 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 defined('_JEXEC') or die;
-
 
 /**
  * Holds the logic for all output related things
@@ -107,7 +105,6 @@ class JEMOutput {
 				$text = JText::_('COM_JEM_DELIVER_NEW_VENUE');
 			}
 
-
 			$url = 'index.php?option=com_jem&task=editvenue.add&return='.base64_encode(urlencode($uri)).'&a_id=0';
 			$title = JText::_('COM_JEM_DELIVER_NEW_VENUE');
 			$desc = JText::_('COM_JEM_DELIVER_NEW_VENUE_DESC');
@@ -139,7 +136,7 @@ class JEMOutput {
 		$settings2	= JemHelper::config();
 		$app		= JFactory::getApplication();
 
-		if ($settings->get('global_show_archive_icon',1)) {
+		if ($params->get('global_show_archive_icon',1)) {
 
 			# check if we're in a print-screen
 			if ($app->input->getInt('print')) {
@@ -338,7 +335,7 @@ class JEMOutput {
 	{
 		$app 		= JFactory::getApplication();
 		$settings	= JemHelper::globalattribs();
-		
+
 		if ($settings->get('global_show_print_icon',0)) {
 			JHtml::_('bootstrap.tooltip');
 
@@ -378,6 +375,7 @@ class JEMOutput {
 
 			return $output;
 		}
+
 		return;
 	}
 
@@ -456,7 +454,7 @@ class JEMOutput {
 			}
 
 			JHtml::_('bootstrap.tooltip');
-			
+
 			$text = JHtml::_('image', 'com_jem/iCal2.0.png', JText::_('COM_JEM_EXPORT_ICS'), NULL, true);
 
 			$desc = JText::_('COM_JEM_ICAL_DESC');
@@ -651,7 +649,6 @@ class JEMOutput {
 	 */
 	static function mapicon($data,$view=false,$params)
 	{
-			
 		$global = JemHelper::globalattribs();
 
 		//stop if disabled
@@ -661,8 +658,8 @@ class JEMOutput {
 
 		if ($view == 'event') {
 			$mapserv	= $params->get('event_show_mapserv');
-		} else if ($view == 'venues') {
-			# @todo check
+		} elseif ($view == 'venues') {
+			// @todo check
 			$mapserv	= $params->get('show_mapserv');
 		} else {
 			$mapserv	= $params->get('show_mapserv');
@@ -689,12 +686,12 @@ class JEMOutput {
 		{
 			case 1:
 				$url = 'http://maps.google.com/maps?&q='.urlencode($data->street.', '.$data->postalCode.' '.$data->city.', '.$data->country.'+ ('.$data->venue.')').'&ie=UTF8&z=15&output=embed" ';
-				
+
 				// link
 				if($data->latitude && $data->longitude) {
 					$url = 'http://maps.google.com/maps?q='.$data->latitude.',+'.$data->longitude.'&ie=UTF8&z=15&output=embed';
 				}
-				
+
 				$message = JText::_('COM_JEM_MAP').':';
 				$attributes = ' rel="{handler: \'iframe\', size: {x: 800, y: 500}}" latitude="" longitude=""';
 				$output = '<dt class="venue_mapicon">'.$message.'</dt><dd class="venue_mapicon"><a class="flyermodal mapicon" title="'.JText::_('COM_JEM_MAP').'" target="_blank" href="'.$url.'"'.$attributes.'>'.$mapimage.'</a></dd>';
@@ -702,7 +699,7 @@ class JEMOutput {
 
 			case 2:
 				$api		= trim($global->get('global_googleapi'));
-				
+
 				# iframe
 				if($data->latitude && $data->longitude) {
 					$output = '<iframe width="500" height="250" frameborder="0" style="border: 1px solid #000" src="https://www.google.com/maps/embed/v1/search?key='.$api.'&q='.urlencode($data->latitude.',+'.$data->longitude).'"></iframe>';
@@ -861,7 +858,6 @@ class JEMOutput {
 		return $output;
 	}
 
-
 	/**
 	 * Formats date
 	 *
@@ -880,7 +876,7 @@ class JEMOutput {
 			$jdate = new JDate($date,$timezone);
 			if (!$format) {
 				// If no format set, use long format as standard
-				$format = JText::_($settings->formatdate);
+				$format = $settings->formatdate;
 			}
 
 			return $jdate->format($format);
@@ -936,34 +932,34 @@ class JEMOutput {
 		$output = "";
 
 		if(JemHelper::isValidDate($dateStart)) {
-			$output .= self::formatdate($dateStart, $format);
+			$output .= '<span class="date">'.self::formatdate($dateStart, $format).'</span>';
 
 			if($settings->get('global_show_timedetails','1') && JemHelper::isValidTime($timeStart)) {
-				$output .= ', '.self::formattime($timeStart);
+				$output .= ', <span class="time">'.self::formattime($timeStart).'</span>';
 			}
 
 			// Display end date only when it differs from start date
 			$displayDateEnd = JemHelper::isValidDate($dateEnd) && $dateEnd != $dateStart;
 			if($displayDateEnd) {
-				$output .= ' - '.self::formatdate($dateEnd, $format);
+				$output .= ' - <span class="time">'.self::formatdate($dateEnd, $format).'</span>';
 			}
 
 			// Display end time only when both times are set
 			if($settings->get('global_show_timedetails','1') && JemHelper::isValidTime($timeStart) && JemHelper::isValidTime($timeEnd))
 			{
 				$output .= $displayDateEnd ? ', ' : ' - ';
-				$output .= self::formattime($timeEnd);
+				$output .= '<span class="time">'.self::formattime($timeEnd).'</span>';
 			}
 		} else {
-			$output .= JText::_('COM_JEM_OPEN_DATE');
+			$output .= '<span class="date">'.JText::_('COM_JEM_OPEN_DATE').'</span>';
 
 			if($settings->get('global_show_timedetails','1')) {
 				if(JemHelper::isValidTime($timeStart)) {
-					$output .= ', '.self::formattime($timeStart);
+					$output .= ', <span class="date">'.self::formattime($timeStart).'</span>';
 				}
 				// Display end time only when both times are set
 				if(JemHelper::isValidTime($timeStart) && JemHelper::isValidTime($timeEnd)) {
-					$output .= ' - '.self::formattime($timeEnd);
+					$output .= ' - <span class="time">'.self::formattime($timeEnd).'<span>';
 				}
 			}
 		}
@@ -1091,13 +1087,11 @@ class JEMOutput {
 	 * @param boolean $doLink Link the categories to the respective Category View
 	 * @return string|multitype:
 	 */
-	static function getCategoryList($categories, $doLink,$backend=false) {
+	static function getCategoryList($categories, $doLink,$backend=false,$FixItemID=false) {
 		$output = array_map(
-			function ($category) use ($doLink,$backend) {
+			function ($category) use ($doLink,$backend,$FixItemID) {
 				if ($doLink) {
-
 					if ($backend) {
-
 						$path = $category->path;
 						$path = str_replace('/',' &#187; ',$path);
 
@@ -1106,8 +1100,11 @@ class JEMOutput {
 								$category->catname.'</a>';
 						$value .= '</span>';
 					} else {
-						$value = '<a href="'.JRoute::_(JemHelperRoute::getCategoryRoute($category->catslug)).'">'.
-								$category->catname.'</a>';
+						if ($FixItemID) {
+							$value = '<a href="'.JRoute::_('index.php?option=com_jem&view=category&id='.$category->catslug.'&Itemid='.$FixItemID).'">'.$category->catname.'</a>';
+						} else {
+							$value = '<a href="'.JRoute::_(JemHelperRoute::getCategoryRoute($category->catslug)).'">'.$category->catname.'</a>';
+						}
 					}
 				} else {
 					$value = $category->catname;
@@ -1119,9 +1116,9 @@ class JEMOutput {
 		return $output;
 	}
 
-
 	static function statuslabel($published = false) {
 
+		# @todo check function
 		$user	= JFactory::getUser();
 		$app	= JFactory::getApplication();
 		$userId	= $user->get('id');
@@ -1148,5 +1145,215 @@ class JEMOutput {
 		}
 	}
 
-} // end class
-?>
+	static function eventDateTime($row, $dateStart = false, $timeStart = false, $dateEnd = false, $timeEnd = false) {
+		# @todo add support for suffix time
+		# @todo replace strftime by date
+
+		if (!$row) {
+			return false;
+		}
+
+		if (!JemHelper::isValidDate($row->dates)) {
+			# for the date function we need at least a valid startdate
+			return false;
+		}
+
+		$result 	= "";
+		$settings 	= JemHelper::config();
+
+		$timeFormat = $settings->formattime;
+		$dateFormat = $settings->formatdate;
+
+
+		if ($timeFormat) {
+			# mapping of time values
+			# incoming values are in strftime format
+			# output is in date format
+			$timeFormat = str_replace('%H','H',$timeFormat);
+			$timeFormat = str_replace('%M','i',$timeFormat);
+			$timeFormat = str_replace('%p','A',$timeFormat);
+			$timeFormat = str_replace('%P','a',$timeFormat);
+			$timeFormat = str_replace('%I','h',$timeFormat);
+			$timeFormat = str_replace('%l','g',$timeFormat);
+		} else {
+			$timeFormat	= "H:i";
+		}
+
+		if (!($dateFormat)) {
+			$dateFormat = "D, M. j, Y";
+		}
+
+		# we have a row so let's combine the date+time and retrieve the date parts
+
+		########################
+		## COMBINE DATE/TIMES ##
+		########################
+
+		# -- date/time Start --
+		# at this point we have a startddate
+		# but we've to see if we have a starttime
+
+		$rowtime = $row->times;
+
+		if ($row->times == null || $row->times == '00:00:00') {
+			$rowtime	= null;
+			$row->times = '00:00:00';
+		}
+
+		$datetimeStart	= new JDate($row->dates.' '.$row->times);
+		$otimeStart		= $datetimeStart->format('H:i');
+		$odateStart		= $datetimeStart->format($dateFormat);
+		
+		if ($otimeStart == '00.00' || $otimeStart == '00:00') {
+			if ($rowtime == null) {
+				$otimeStart = "";
+			} else {
+				$otimeStart = $datetimeStart->format($timeFormat);
+			}
+		} else {
+			$otimeStart = $datetimeStart->format($timeFormat);
+		}
+		
+
+		# -- date/time End --
+		# - no enddate + no endtime = blank both variables
+		# - no enddate + endtime = the time will be combined with the startdate
+		# - enddate + endtime = the time + enddate will be filled
+		# - enddate + no endtime = the time will be blanked, but the date will be outputted
+
+		$rowendtime = $row->endtimes;
+
+		if ($row->endtimes == null || $row->endtimes == '00:00:00') {
+			$rowendtime	   = null;
+			$row->endtimes = '00:00:00';
+		}
+
+		if (!($row->enddates == null || $row->enddates == '0000-00-00')) {
+			# we have a enddate
+			$datetimeEnd	= new JDate($row->enddates.' '.$row->endtimes);
+			$odateEnd		= $datetimeEnd->format($dateFormat);
+			$otimeEnd		= $datetimeEnd->format('H:i');
+
+			if ($otimeEnd == '00.00' || $otimeEnd == '00:00') {
+				if ($rowendtime == null) {
+					$otimeEnd = "";
+				} else {
+					$otimeEnd = $datetimeEnd->format($timeFormat);
+				}
+			} else {
+				$otimeEnd	= $datetimeEnd->format($timeFormat);
+			}
+		}
+
+		if ($row->enddates == null || $row->enddates == '0000-00-00') {
+			# we don't have a enddate, but do we have a endtime?
+
+			$odateEnd = "";
+
+			if ($rowendtime == null) {
+				$otimeEnd = "";
+			} else {
+				# we do have a endtime but no enddate so let's combine it with the startddate
+				$datetimeEnd	= new JDate($row->dates.' '.$row->endtimes);
+				//$odateEnd		= $datetimeEnd->format($dateFormat);
+				$otimeEnd		= $datetimeEnd->format($timeFormat);
+			}
+
+		}
+
+		# outputting
+		$result = array();
+
+		if ($dateStart) {
+			$result['dateStart']	= $odateStart;
+		}
+		if ($timeStart) {
+			$lang = JFactory::getLanguage();
+			if ($lang->getTag() == 'zh-TW') {
+			}
+			$result['timeStart']	= $otimeStart;
+		}
+
+		if ($dateStart && $timeStart) {
+			# we like to output both values so let's combine the values
+
+			if ($odateStart && $otimeStart) {
+				$value = $odateStart.' '.$otimeStart;
+			}
+			if (!$odateStart && $otimeStart) {
+				$value = $otimeStart;
+			}
+			if ($odateStart && !$otimeStart) {
+				$value = $odateStart;
+			}
+			if (!$odateStart && !$otimeStart) {
+				$value = "";
+			}
+
+			$result['startDateTime'] = $value;
+		}
+		if ($dateEnd) {
+			$result['dateEnd']	= $odateEnd;
+		}
+		if ($timeEnd) {
+			$lang = JFactory::getLanguage();
+			if ($lang->getTag() == 'zh-TW') {
+			}
+			$result['timeEnd']	= $otimeEnd;
+		}
+		if ($dateEnd && $timeEnd) {
+			# we like to output both values so let's combine the values
+
+			if ($odateEnd && $otimeEnd) {
+				$value = $odateEnd.' '.$otimeEnd;
+			}
+			if (!$odateEnd && $otimeEnd) {
+				# let's check if we have a startdate
+				if ($odateStart) {
+					$value = $odateStart.' '.$otimeEnd;
+				} else {
+					$value = $otimeEnd;
+				}
+			}
+			if ($odateEnd && !$otimeEnd) {
+				$value = $odateEnd;
+			}
+			if (!$odateEnd && !$otimeEnd) {
+				$value = "";
+			}
+
+			$result['endDateTime'] = $value;
+		}
+
+		if ($result['startDateTime'] && $result['endDateTime']) {
+			# check if the dates are the same
+			# if so we will define a new value called "combinedDateTime"
+
+			$start_day	= $datetimeStart->format('m-d-Y');
+			$end_day	= $datetimeEnd->format('m-d-Y');
+
+			if ($start_day == $end_day) {
+
+				$value = '';
+				$value .= $odateStart.' ';
+
+				if ($otimeStart & $otimeEnd) {
+					$value .= $otimeStart. '-' .$otimeEnd;
+				}
+				if (!$otimeStart & $otimeEnd) {
+					$value .= $otimeEnd;
+				}
+				if ($otimeStart & !$otimeEnd) {
+					$value .= $otimeStart;
+				}
+				if (!$otimeStart & !$otimeEnd) {
+					$value .= '';
+				}
+
+				$result['combinedDateTime'] = $value;
+			}
+		}
+
+		return $result;
+	}
+}

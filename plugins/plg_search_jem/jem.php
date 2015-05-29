@@ -1,9 +1,8 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
  * @subpackage JEM Search Plugin
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
@@ -14,12 +13,11 @@ jimport('joomla.html.parameter');
 
 class plgSearchJEM extends JPlugin
 {
-	public function __construct(& $subject, $config)
-	{
+    public function __construct(& $subject, $config)
+    {
 		parent::__construct($subject, $config);
 		JPlugin::loadLanguage( 'plg_search_jem', JPATH_ADMINISTRATOR);
 	}
-
 
 	/**
 	 * @return array An array of search areas
@@ -53,7 +51,7 @@ class plgSearchJEM extends JPlugin
 		$groups	= implode(',', $user->getAuthorisedViewLevels());
 		$tag = JFactory::getLanguage()->getTag();
 
-		require_once(JPATH_SITE.'/components/com_jem/helpers/route.php');
+		require_once JPATH_SITE . '/components/com_jem/helpers/route.php';
 
 		if (is_array( $areas )) {
 			if (!array_intersect( $areas, array_keys( $this->onContentSearchAreas() ) )) {
@@ -318,9 +316,9 @@ class plgSearchJEM extends JPlugin
 			}
 
 			return $results;
-		} else if ( $count == 1 ) {
+		} elseif ( $count == 1 ) {
 			return $rows[0];
 		}
 	}
 }
-?>
+

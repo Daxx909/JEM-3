@@ -1,25 +1,24 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 defined('_JEXEC') or die;
 
-
 /**
  * View: Events
  */
- class JEMViewEvents extends JViewLegacy {
+class JEMViewEvents extends JViewLegacy
+{
 
 	protected $items;
 	protected $pagination;
 	protected $state;
 
-	public function display($tpl = null)
-	{
+    public function display($tpl = null)
+    {
 		$user 		= JFactory::getUser();
 		$document	= JFactory::getDocument();
 		$settings 	= JEMHelper::globalattribs();
@@ -56,8 +55,7 @@ defined('_JEXEC') or die;
 		$this->addToolbar();
 
 		parent::display($tpl);
-		}
-
+	}
 
 	/**
 	 * Add Toolbar
@@ -82,23 +80,10 @@ defined('_JEXEC') or die;
 
 		/* state */
 		if ($canDo->get('core.edit.state')) {
-			if ($this->state->get('filter.published') != 2) {
-				JToolBarHelper::publishList('events.publish', 'JTOOLBAR_PUBLISH', true);
-				JToolBarHelper::unpublishList('events.unpublish', 'JTOOLBAR_UNPUBLISH', true);
-				JToolBarHelper::custom('events.featured', 'featured.png', 'featured_f2.png', 'JFEATURED', true);
-			}
-
-			if ($this->state->get('filter.published') != -1) {
-				JToolBarHelper::divider();
-				if ($this->state->get('filter_state') != 2) {
-					JToolBarHelper::archiveList('events.archive');
-				} elseif ($this->state->get('filter_state') == 2) {
-					JToolBarHelper::unarchiveList('events.publish');
-				}
-			}
-		}
-
-		if ($canDo->get('core.edit.state')) {
+			JToolBarHelper::publishList('events.publish', 'JTOOLBAR_PUBLISH', true);
+			JToolBarHelper::unpublishList('events.unpublish', 'JTOOLBAR_UNPUBLISH', true);
+			JToolBarHelper::custom('events.featured', 'featured.png', 'featured_f2.png', 'JFEATURED', true);
+			JToolBarHelper::archiveList('events.archive');
 			JToolBarHelper::checkin('events.checkin');
 		}
 
@@ -112,4 +97,3 @@ defined('_JEXEC') or die;
 		JToolBarHelper::help('listevents', true);
 	}
 }
-?>

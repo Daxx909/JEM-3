@@ -1,14 +1,11 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
-defined('_JEXEC') or die();
-
-
+defined('_JEXEC') or die;
 
 /**
  * Model-Event
@@ -86,7 +83,7 @@ class JemModelEvent extends JModelItem
 
 				// Join on user table.
 				$name = $settings->get('global_regname','1') ? 'u.name' : 'u.username';
-				$query->select($name.' AS author');
+				$query->select(array($name.' AS author','u.name','u.username'));
 				$query->join('LEFT', '#__users AS u on u.id = a.created_by');
 
 				// Join on contact-user table.
@@ -95,7 +92,7 @@ class JemModelEvent extends JModelItem
 
 				// Join on venue table.
 				$query->select('l.custom1 AS venue1, l.custom2 AS venue2, l.custom3 AS venue3, l.custom4 AS venue4, l.custom5 AS venue5, l.custom6 AS venue6, l.custom7 AS venue7, l.custom8 AS venue8, l.custom9 AS venue9, l.custom10 AS venue10, ' .
-				               'l.id AS locid, l.alias AS localias, l.venue, l.city, l.state, l.url, l.locdescription, l.locimage, l.city, l.postalCode, l.street, l.country, l.map, l.created_by AS venueowner, l.latitude, l.longitude, l.timezone, l.checked_out AS vChecked_out, l.checked_out_time AS vChecked_out_time');
+				               'l.id AS locid, l.alias AS localias, l.venue, l.city, l.state, l.url, l.locdescription, l.locimage, l.city, l.postalCode, l.street, l.country,l.phone,l.fax,l.email,l.map, l.created_by AS venueowner, l.latitude, l.longitude, l.timezone, l.checked_out AS vChecked_out, l.checked_out_time AS vChecked_out_time');
 				$query->join('LEFT', '#__jem_venues AS l ON a.locid = l.id');
 
 				# join over the category-tables
@@ -127,7 +124,6 @@ class JemModelEvent extends JModelItem
 					$query->where('(a.published = ' . (int) $published . ' OR a.published =' . (int) $archived . ')');
 				}
 
-
 				#####################
 				### FILTER - BYCAT ##
 				#####################
@@ -144,7 +140,6 @@ class JemModelEvent extends JModelItem
 				}
 
 				if (empty($data)) {
-					//return JError::raiseError(404, JText::_('COM_JEM_EVENT_ERROR_EVENT_NOT_FOUND'));
 					throw new Exception(JText::_('COM_JEM_EVENT_ERROR_EVENT_NOT_FOUND'), 404);
 				}
 
@@ -243,7 +238,7 @@ class JemModelEvent extends JModelItem
 		$db->setQuery($query);
 		$res = $db->loadResult();
 		$this->_item[$pk]->booked = $res;
-		
+
 		// Define Waiters
 		$db = $this->getDbo();
 		$query = $db->getQuery(true);
@@ -336,7 +331,6 @@ class JemModelEvent extends JModelItem
 
 		$query->where('c.published = 1');
 
-
 		###################
 		## FILTER-ACCESS ##
 		###################
@@ -344,14 +338,12 @@ class JemModelEvent extends JModelItem
 		# Filter by access level.
 		$access = $this->getState('filter.access');
 
-
 		###################################
 		## FILTER - MAINTAINER/JEM GROUP ##
 		###################################
 
 		# as maintainter someone who is registered can see a category that has special rights
 		# let's see if the user has access to this category.
-
 
 		$query3	= $db->getQuery(true);
 		$query3 = 'SELECT gr.id'
@@ -373,7 +365,6 @@ class JemModelEvent extends JModelItem
 				$query->where('(c.access IN ('.$groups.'))');
 			}
 		}
-
 
 		#######################
 		## FILTER - CATEGORY ##
@@ -461,7 +452,7 @@ class JemModelEvent extends JModelItem
 		$query->select(array('waiting+1')); // 1 if user is registered, 2 if on waiting
 		$query->from('#__jem_register');
 		$query->where(array('uid = '.$userid,'event = '. $this->getState('event.id')));
-	
+
 		$db->setQuery($query);
 		return $db->loadResult();
 	}
@@ -478,7 +469,7 @@ class JemModelEvent extends JModelItem
 		// Get registered users
 		$db = $this->getDbo();
 		$query = $db->getQuery(true);
-		
+
 		$query->select(array('u.name,u.username, r.uid'));
 		$query->from('#__jem_register as r');
 		$query->join('LEFT', '#__users AS u ON u.id = r.uid');
@@ -486,7 +477,7 @@ class JemModelEvent extends JModelItem
 		$db->setQuery($query);
 
 		$registered = $db->loadObjectList();
-		
+
 		return $registered;
 	}
 
@@ -519,9 +510,9 @@ class JemModelEvent extends JModelItem
 			JError::raiseError(403, JText::_('COM_JEM_ALERTNOTAUTH'));
 			return;
 		}
-		
+
 		try {
-			$event = $this->getItem($eventId);
+			$event = $this->getItem($eventid);
 		}
 		// error handling
 		catch (Exception $e) {
@@ -577,13 +568,13 @@ class JemModelEvent extends JModelItem
 			JError::raiseError(403, JText::_('COM_JEM_ALERTNOTAUTH'));
 			return;
 		}
-		
+
 		$db 	= JFactory::getDBO();
 		$query	= $db->getQuery(true);
-		
-		$query->delete('#__jem_register');	
+
+		$query->delete('#__jem_register');
 		$query->where(array('event = ' . $eventid,'uid= ' . $userid));
-		
+
 		$db->SetQuery($query);
 
 		if (!$db->execute()) {
@@ -592,52 +583,51 @@ class JemModelEvent extends JModelItem
 
 		return true;
 	}
-	
+
 	function getKunenaConfig() {
 		static $kconfig = false;
 		if ($kconfig === false) {
 			// Run only one time
 			$kconfig = null;
-	
+
 			// Make sure that Kunena API (if exists) has been loaded
 			$api = JPATH_ADMINISTRATOR . '/components/com_kunena/api.php';
 			if (is_file($api))
 				require_once $api;
-	
+
 			if (class_exists('KunenaFactory')) {
-	
+
 				// Support for Kunena 1.6, 1.7 and 2.0
 				$kconfig = KunenaFactory::getConfig();
-	
+
 			} elseif (is_file(JPATH_ROOT.'/components/com_kunena/lib/kunena.config.class.php')) {
-	
+
 				// Support for Kunena 1.0 and 1.5
 				require_once JPATH_ROOT.'/components/com_kunena/lib/kunena.config.class.php';
-	
+
 				// Next 4 lines are needed to make <1.0.9 and <1.5.2 to work
 				if (is_file(JPATH_ROOT.'/components/com_kunena/lib/kunena.debug.php'))
 					require_once JPATH_ROOT.'/components/com_kunena/lib/kunena.debug.php';
 				if (is_file(JPATH_ROOT.'/components/com_kunena/lib/kunena.user.class.php'))
 					require_once JPATH_ROOT.'/components/com_kunena/lib/kunena.user.class.php';
-	
+
 				if (method_exists('CKunenaConfig', 'getInstance')) {
 					// Support for Kunena 1.0.9+ and 1.5
 					$kconfig = CKunenaConfig::getInstance();
-	
+
 				} elseif (class_exists('CKunenaConfig')) {
 					// Support for Kunena 1.0.8
 					$kconfig = new CKunenaConfig();
 					$kconfig->load();
-	
+
 				} elseif (class_exists('fb_Config')) {
 					// Support for Kunena 1.0.6RC2 and 1.0.7b
 					$kconfig = new fb_Config();
 					$kconfig->load();
-	
+
 				}
 			}
 		}
 		return $kconfig;
 	}
 }
-?>

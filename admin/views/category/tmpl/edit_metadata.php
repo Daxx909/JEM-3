@@ -1,8 +1,7 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
@@ -22,7 +21,7 @@ defined('_JEXEC') or die;
 
 	<?php foreach($this->form->getGroup('metadata') as $field): ?>
 		<div class="control-group">
-		<?php if ($field->hidden): ?>
+		<?php if ($field->hidden) : ?>
 			<div class="controls"><?php echo $field->input; ?></div>
 		<?php else: ?>
 			<div class="control-label"><?php echo $field->label; ?></div>

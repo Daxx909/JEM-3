@@ -1,21 +1,19 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 defined('_JEXEC') or die;
-
 
 /**
  * Model-MyVenues
  */
 class JemModelMyvenues extends JModelLegacy
 {
-	var $_venues = null;
-	var $_total_venues = null;
+	public $_venues = null;
+	public $_total_venues = null;
 
 	/**
 	 * Constructor
@@ -31,7 +29,7 @@ class JemModelMyvenues extends JModelLegacy
 
 		$limit		= $app->getUserStateFromRequest('com_jem.myvenues.'.$itemid.'.limit', 'limit', $jemsettings->display_num, 'uint');
 		$limitstart = $app->input->get('limitstart', 0, 'uint');
-		
+
 		$this->setState('limit', $limit);
 		$this->setState('limitstart', $limitstart);
 	}
@@ -168,7 +166,7 @@ class JemModelMyvenues extends JModelLegacy
 		$search 		= $this->_db->escape(trim(JString::strtolower($search)));
 
 		$where = array();
-		
+
 		$where[] = ' l.published IN (0,1,2,-2)';
 
 		// check if venue is created by the user
@@ -199,4 +197,3 @@ class JemModelMyvenues extends JModelLegacy
 		return $where;
 	}
 }
-?>

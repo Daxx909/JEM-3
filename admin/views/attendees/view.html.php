@@ -1,31 +1,29 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 defined('_JEXEC') or die;
 
-
 /**
  * View: Attendees
  */
 class JemViewAttendees extends JViewLegacy {
-	
+
 	protected $items;
 	protected $pagination;
 	protected $state;
-	
+
 	public function display($tpl = null)
 	{
 		$app = JFactory::getApplication();
 
-		if($this->getLayout() == 'print') {
-			$this->_displayprint($tpl);
-			return;
-		}
+        if ($this->getLayout() == 'print') {
+            $this->_displayprint($tpl);
+            return;
+        }
 
 		// Load css
 		JHtml::_('stylesheet', 'com_jem/backend.css', array(), true);
@@ -83,7 +81,6 @@ class JemViewAttendees extends JViewLegacy {
 		parent::display($tpl);
 	}
 
-
 	/**
 	 * Add Toolbar
 	 */
@@ -91,7 +88,7 @@ class JemViewAttendees extends JViewLegacy {
 	{
 		/* retrieving the allowed actions for the user */
 		$canDo = JEMHelperBackend::getActions(0);
-		
+
 		JToolBarHelper::title(JText::_('COM_JEM_REGISTERED_USERS'), 'users');
 
 		/* create */
@@ -106,4 +103,3 @@ class JemViewAttendees extends JViewLegacy {
 		JToolBarHelper::help('registereduser', true);
 	}
 }
-?>

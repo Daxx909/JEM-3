@@ -1,8 +1,7 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
@@ -21,7 +20,6 @@ class JemControllerPlugins extends JControllerLegacy
 	{
 		parent::__construct();
 	}
-
 
 	/**
 	 * Handles Plugin screen
@@ -54,4 +52,3 @@ class JemControllerPlugins extends JControllerLegacy
 		$this->setRedirect($link, $msg);
 	}
 }
-?>

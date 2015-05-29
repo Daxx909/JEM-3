@@ -1,8 +1,7 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  *
@@ -163,6 +162,7 @@ $params = $params->toArray();
 			echo $this->form->renderField('published');
 			echo $this->form->renderField('featured');
 			echo $this->form->renderField('access');
+			echo $this->form->renderField('language');
 		?>
 		</fieldset>
 		
@@ -271,7 +271,6 @@ $params = $params->toArray();
 			echo $this->form->renderField('recurrence_exdates');
 			echo $this->form->renderField('recurrence_until');
 			?>
-			
 			<!-- Check if the're holidays -->
 			<?php if ($this->item->recurrence_country_holidays) { ?>
 			<div class="control-group">

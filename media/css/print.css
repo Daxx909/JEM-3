@@ -1,7 +1,6 @@
 /**
- * @version 3.0.3
  * @package JEM
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
@@ -17,12 +16,12 @@ div#jem table a {
 }
 
 div#jem .image {
-	border: 0px !important;
+	border: 0 !important;
 	background-color: white !important;
 }
 
 div#jem h2 {
-	border: 0px !important;
+	border: 0 !important;
 }
 
 div#jem #jem_filter {
@@ -30,7 +29,7 @@ div#jem #jem_filter {
 }
 
 div#jem div.info_container {
-	border: 0px !important;
+	border: 0 !important;
 }
 
 div#jem	h2 {
@@ -38,18 +37,18 @@ div#jem	h2 {
 	margin-top: 25px !important;
 	background-color: white !important;
 }
-	
+
 header nav, footer {
 display: none;
 }
 
 @page {
-margin: 0.5cm;
+	margin: 0.5cm;
 }
 
 body {
-font: 12pt Georgia, "Times New Roman", Times, serif;
-line-height: 1.3;
+	font-family: "Arial";
+	line-height: 1.3;
 }
 
 h1 {
@@ -66,14 +65,14 @@ font-size: 18pt;
 }
 
 
-	
+
 #main a:link, #main a:visited {
 	text-decoration: none !important;
 	color: inherit !important;
 }
 
 div#jem {
-	border: 0px !important;
+	border: 0 !important;
 	background-color:white !important;
 }
 
@@ -87,8 +86,8 @@ div#jem .flyerimage {
 
 a[href]:after {
 	content: none !important;
-}	
-	
+}
+
 div#jem .buttons {
 	display: none;
 }
@@ -126,5 +125,5 @@ div#jem .pagination {
 	div#jem .icon-print {
 		display:none;
 	}
-	
+
 }

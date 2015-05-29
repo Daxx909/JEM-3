@@ -1,8 +1,7 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
@@ -10,7 +9,6 @@ defined('_JEXEC') or die;
 
 $db = JFactory::getDBO();
 jimport('joomla.filesystem.folder');
-
 
 /**
  * Script file of JEM component
@@ -111,7 +109,6 @@ class com_jemInstallerScript
 			</p> <?php
 		}
 
-
 		$param_array = array(
 				"event_comunoption"=>"0",
 				"event_comunsolution"=>"0",
@@ -148,7 +145,8 @@ class com_jemInstallerScript
 				"global_show_detlinkvenue"=>"1",
 				"global_show_mapserv"=>"0",
 				"global_tld"=>"",
-				"global_lg"=>""
+				"global_lg"=>"",
+				"global_cleanup_db_on_uninstall"=>"0"
 		);
 
 		$this->setGlobalAttribs($param_array);
@@ -165,6 +163,21 @@ class com_jemInstallerScript
 		<h2><?php echo JText::_('COM_JEM_UNINSTALL_STATUS'); ?>:</h2>
 		<p><?php echo JText::_('COM_JEM_UNINSTALL_TEXT'); ?></p>
 		<?php
+
+		$globalParams = $this->getGlobalParams();
+		$cleanup = $globalParams->get('global_cleanup_db_on_uninstall', 0);
+		if (!empty($cleanup)) {
+			// user decided to fully remove JEM - so do it!
+			$this->removeJemMenuItems();
+			$this->removeAllJemTables();
+			$imageDir = JPATH_SITE.'/images/jem';
+			if (JFolder::exists($imageDir)) {
+				JFolder::delete($imageDir);
+			}
+		} else {
+			// prevent dead links on frontend
+			$this->disableJemMenuItems();
+		}
 	}
 
 	/**
@@ -177,6 +190,7 @@ class com_jemInstallerScript
 		$this->getHeader(); ?>
 		<h2><?php echo JText::_('COM_JEM_UPDATE_STATUS'); ?>:</h2>
 		<p><?php echo JText::sprintf('COM_JEM_UPDATE_TEXT', $parent->get('manifest')->version); ?></p>;
+
 		<?php
 	}
 
@@ -258,6 +272,10 @@ class com_jemInstallerScript
 			}
 
 		}
+
+		if ($type == 'install') {
+			$this->fixJemMenuItems();
+		}
 	}
 
 	/**
@@ -304,6 +322,25 @@ class com_jemInstallerScript
 			$db->setQuery($query);
 			$db->execute();
 		}
+	}
+
+	/**
+	 * Gets globalattrib values from the settings table
+	 *
+	 * @return JRegistry object
+	 */
+	private function getGlobalParams()
+	{
+		$registry = new JRegistry;
+		try {
+			$db = JFactory::getDbo();
+			$query = $db->getQuery(true);
+			$query->select('globalattribs')->from('#__jem_settings')->where('id=1');
+			$db->setQuery($query);
+			$registry->loadString($db->loadResult());
+		} catch (Exception $ex) {
+		}
+		return $registry;
 	}
 
 	/**
@@ -385,6 +422,67 @@ class com_jemInstallerScript
 		$db->execute();
 	}
 
+
+	/**
+	 * Remove all JEM menu items.
+	 *
+	 * @return void
+	 */
+	private function removeJemMenuItems()
+	{
+		// remove all "com_jem..." frontend entries
+		$db = JFactory::getDbo();
+		$query = $db->getQuery(true);
+		$query->delete('#__menu');
+		$query->where(array('client_id = 0', 'link LIKE "index.php?option=com_jem%"'));
+		$db->setQuery($query);
+		$db->execute();
+	}
+
+	/**
+	 * Disable all JEM menu items.
+	 * (usefull on uninstall to prevent dead links)
+	 *
+	 * @return void
+	 */
+	private function disableJemMenuItems()
+	{
+		// unpublish all "com_jem..." frontend entries
+		$db = JFactory::getDbo();
+		$query = $db->getQuery(true);
+		$query->update('#__menu');
+		$query->set('published = 0');
+		$query->where(array('client_id = 0', 'published > 0', 'link LIKE "index.php?option=com_jem%"'));
+		$db->setQuery($query);
+		$db->execute();
+	}
+
+	/**
+	 * Fix all JEM menu items by setting new extension id.
+	 * (usefull on install to let menu items from older installation refer new extension id)
+	 *
+	 * @return void
+	 */
+	private function fixJemMenuItems()
+	{
+		// Get (new) extension ID of JEM
+		$db = JFactory::getDbo();
+		$query = $db->getQuery(true);
+		$query->select('extension_id')->from('#__extensions')->where(array("type='component'", "element='com_jem'"));
+		$db->setQuery($query);
+		$newId = $db->loadResult();
+
+		if($newId) {
+			// set compponent id on all "com_jem..." frontend entries
+			$query = $db->getQuery(true);
+			$query->update('#__menu');
+			$query->set('component_id = ' . $db->quote($newId));
+			$query->where(array('client_id = 0', 'link LIKE "index.php?option=com_jem%"'));
+			$db->setQuery($query);
+			$db->execute();
+		}
+	}
+
 	/**
 	 * Remove all obsolete files and folders of previous versions.
 	 *
@@ -428,7 +526,13 @@ class com_jemInstallerScript
 			'/components/com_jem/layouts/searchtools/default/list.php',
 			'/components/com_jem/layouts/searchtools/grid/sort.php',
 			'/media/com_jem/js/settings.js',
-			'/media/com_jem/js/unlimited.js'
+			'/media/com_jem/js/unlimited.js',
+			# 3.0.3 -> 3.0.4
+			'/media/com_jem/js/dropdown.js',
+			# 3.0.6 -> 3.0.7
+			'/components/com_jem/models/fields/catoptions.php',
+			'/components/com_jem/models/fields/modal/venuefront.php',
+			'/components/com_jem/models/fields/modal/contactfront.php'
 		);
 		$folders = array();
 
@@ -444,8 +548,7 @@ class com_jemInstallerScript
 			}
 		}
 	}
-	
-	
+
 	/**
 	 * Updating files: 302->303
 	 */
@@ -455,7 +558,7 @@ class com_jemInstallerScript
 		###############################
 		## # update calendar entries ##
 		###############################
-		require_once (JPATH_COMPONENT_SITE.'/classes/categories.class.php');
+		require_once JPATH_SITE . '/components/com_jem/classes/categories.class.php';
 
 		$types = array('calendar','category','venue');
 
@@ -464,27 +567,27 @@ class com_jemInstallerScript
 			$query = $db->getQuery(true);
 			$query->select('id, link, params');
 			$query->from('#__menu');
-			
+
 			if ($type == 'calendar') {
 				$query->where(array("link LIKE 'index.php?option=com_jem&view=calendar'"));
 			} else {
 				$query->where(array("link LIKE 'index.php?option=com_jem&view=".$type."&layout=calendar%'"));
 			}
-			
+
 			$query->order('id');
 			$db->setQuery($query);
 			$items = $db->loadObjectList();
-	
+
 			foreach ($items as $item) :
-			
+
 				# set params
 				$params = json_decode($item->params, true);
-			
+
 				if ($type == 'category' || $type == 'venue') {
 					# get id nr
 					$id = strstr($item->link, '&id=');
 					$id = str_replace('&id=', '', $id);
-	
+
 					if ($type == 'category') {
 						$params['catids'] = $id;
 						$params['catidsfilter'] = 1;
@@ -495,63 +598,75 @@ class com_jemInstallerScript
 						$params['venueidsfilter'] = 1;
 					}
 				}
-			
+
 				if ($type == 'calendar') {
 					# retrieve value 'top_category'
-					$top_category	= $params['top_category'];
-					$children = JEMCategories::getChilds($top_category);
-					if (count($children)) {
-						$params['catids'] = implode(',', $children);
-						$params['catidsfilter'] = 1;
+					if (isset($params['top_category'])) {
+						$top_category	= $params['top_category'];
+						$childs = JEMCategories::getChilds($top_category);
+
+						# see if we're dealing with root as first array value
+						# if so then we're taking that value and are hiding it so it will display all other categories
+
+						$first = reset($childs);
+
+						if ($first == 0 || $first == 1) {
+							$params['catids'] = 1;
+							$params['catidsfilter'] = 0;
+						} else {
+							if (count($childs) > 1) {
+								# strip of first value as that one is the category it's retreving childs from
+								$reorder = array_shift($childs);
+								$params['catids'] = $childs;
+								$params['catidsfilter'] = 1;
+							}
+						}
+					}	else {
+						$params['catids'] = 1;
+						$params['catidsfilter'] = 0;
 					}
 				}
-				
+
 				# store params + new link value
 				$paramsString = json_encode($params);
-						
+
 				$query = $db->getQuery(true);
 				$query->update('#__menu')
 				->set(array('params = '.$db->quote($paramsString),'link = '.$db->Quote('index.php?option=com_jem&view=calendar')))
 				->where(array("id = ".$item->id));
 				$db->setQuery($query);
-				$db->query();
-									
+				$db->execute();
 			endforeach;
-		endforeach;	
+		endforeach;
+	}
 
-		
-		##############################
-		## Removal of version field ##
-		##############################
-		
-		$query = $db->getQuery(true);
-		$settings_result = array();
-			
-		try
-		{
-			$db->setQuery('SHOW FULL COLUMNS FROM #__jem_settings');
-			$fields = $db->loadObjectList();
-				
-			foreach ($fields as $field){
-				$settings_result[$field->Field] = preg_replace("/[(0-9)]/", '', $field->Type);
+	/**
+	 * Deletes all JEM tables on database if option says so.
+	 *
+	 * @return void
+	 */
+	private function removeAllJemTables()
+	{
+		$db = JFactory::getDbo();
+		$tables = array('#__jem_attachments',
+		                '#__jem_categories',
+		                '#__jem_cats_event_relations',
+		                '#__jem_countries',
+						'#__jem_dates',
+		                '#__jem_events',
+		                '#__jem_groupmembers',
+		                '#__jem_groups',
+						'#__jem_recurrence',
+						'#__jem_recurrence_master',
+		                '#__jem_register',
+		                '#__jem_settings',
+		                '#__jem_venues');
+		foreach ($tables AS $table) {
+			try {
+				$db->dropTable($table);
+			} catch (Exception $ex) {
+				// simply continue with next table
 			}
-		
-			$settings_result = array_keys($settings_result);
-		}
-		catch (Exception $e)
-		{
-			$settings_result = false;
-		}
-		
-		if ($settings_result) {
-			if (in_array('version',$settings_result)) {
-				# the version was not added in the update.sql of JEM 3.0.2 but it was in the install.sql
-				# as the field can be removed we've to check if the field is there and if so then fire up an action
-				# to remove the field
-				$query = $db->getQuery(true);
-				$db->setQuery('alter table #__jem_settings drop column version');
-				$db->query();
-			} 
 		}
 	}
 }

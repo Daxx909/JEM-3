@@ -3,19 +3,23 @@
  * JEM Package
  * @package JEM.Package
  *
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  *
  * @copyright (C) 2008 - 2013 Kunena Team. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
  * @link http://www.kunena.org
  **/
-defined ( '_JEXEC' ) or die ();
+defined ('_JEXEC') or die;
 
 /**
  * JEM package installer script.
  */
 class Pkg_JemInstallerScript {
+
+	private $oldRelease = "";
+	private $newRelease = "";
+	
 	/**
 	 * List of supported versions. Newest version first!
 	 * @var array
@@ -45,7 +49,7 @@ class Pkg_JemInstallerScript {
 		);
 
 	public function install($parent) {
-		// $this->getHeader();
+			//$this->getHeader();
 		return true;
 	}
 
@@ -54,7 +58,7 @@ class Pkg_JemInstallerScript {
 	}
 
 	public function update($parent) {
-		// $this->getHeader();
+			//$this->getHeader();
 		return self::install($parent);
 	}
 
@@ -69,6 +73,23 @@ class Pkg_JemInstallerScript {
 		// Prevent installation if requirements are not met.
 		if (!$this->checkRequirements($manifest->version)) return false;
 
+		// abort if the release being installed is not newer than the currently installed version
+		if ($type == 'update') {
+			// Installed component version
+			$this->oldRelease = $this->getParam('version');
+
+			// Installing component version as per Manifest file
+			$this->newRelease = $parent->get('manifest')->version;
+
+			$this->setUpdateServer();
+			
+			/*
+			if ($this->oldRelease < 3) {
+				Jerror::raiseNotice(100,JText::sprintf('PKG_JEM_INSTALLATION_PREVENTINSTALL',$this->oldRelease));	
+				return false;	
+			}
+			*/
+		}
 		return true;
 	}
 
@@ -88,11 +109,15 @@ class Pkg_JemInstallerScript {
 		}
 
 		if ($type == 'uninstall') return true;
-
+		
+		if ($type == 'install' || $type == 'update') {
+			/* $parent->getParent()->setRedirectURL(JRoute::_('index.php?option=com_jem&view=main', false)); */
+		}
+		
 		$this->enablePlugin('content', 'jem');
 	//	$this->enablePlugin('search', 'jem');
 	//	$this->enablePlugin('jem', 'mailer');
-
+	
 		return true;
 	}
 
@@ -173,6 +198,26 @@ class Pkg_JemInstallerScript {
 		return true;
 	}
 	
+	protected function setUpdateServer() {
+		$app = JFactory::getApplication();
+		
+		$version = array('3.0.1','3.0.2','3.0.3','3.0.4','3.0.5','3.0.6');
+		
+		if (in_array($this->oldRelease,$version)) {
+			// Remove entry in table update_sites
+			$db = JFactory::getDbo();
+			$query	= $db->getQuery(true);
+			$query->delete('#__update_sites');
+			$query->where('name = '.$db->q('JEM Update Site'));
+			$db->setQuery($query);
+			$db->execute(); 
+		}
+		
+		return true;
+		
+	}
+	
+	
 	/**
 	 * Helper method that outputs a short JEM header with logo and text
 	 */
@@ -182,5 +227,21 @@ class Pkg_JemInstallerScript {
 		<h1><?php echo JText::_('PKG_JEM'); ?></h1>
 		<p class="small"><?php echo JText::_('PKG_JEM_INSTALLATION_HEADER'); ?></p>
 		<?php
+	}
+	
+	/**
+	 * Get a parameter from the manifest file (actually, from the manifest cache).
+	 *
+	 * @param $name  The name of the parameter
+	 *
+	 * @return The parameter
+	 */
+	private function getParam($name) {
+		$db = JFactory::getDbo();
+		$query = $db->getQuery(true);
+		$query->select('manifest_cache')->from('#__extensions')->where(array("type = 'package'", "element = 'pkg_jem'"));
+		$db->setQuery($query);
+		$manifest = json_decode($db->loadResult(), true);
+		return $manifest[$name];
 	}
 }

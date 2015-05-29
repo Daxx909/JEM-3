@@ -1,13 +1,11 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 defined('_JEXEC') or die;
-
 
 /**
  * Calendar-View
@@ -40,17 +38,17 @@ class JemViewCalendar extends JViewLegacy
 		$eventandmorecolor = $params->get('eventandmorecolor');
 
 		$style = '
-		div[id^=\'catz\'] a {color:' . $evlinkcolor . ';}
-		div[id^=\'catz\'] {background-color:'.$evbackgroundcolor .';}
-		.eventcontent {background-color:'.$evbackgroundcolor .';}
-		.eventandmore {background-color:'.$eventandmorecolor .';}
-		.today .daynum {background-color:'.$currentdaycolor.';}';
+		div#jem div[id^=\'catz\'] a {color:' . $evlinkcolor . ' !important;}
+		div#jem div[id^=\'catz\'] {background-color:'.$evbackgroundcolor .';}
+		div#jem .eventcontent {background-color:'.$evbackgroundcolor .'; !important}
+		div#jem .eventandmore {background-color:'.$eventandmorecolor .' !important;}
+		div#jem .today .daynum {background-color:'.$currentdaycolor.' !important;}';
 
 		$document->addStyleDeclaration($style);
 
 		// add javascript (using full path - see issue #590)
 		JHtml::_('script', 'media/com_jem/js/calendar.js');
-		
+
 		$year 	= $app->input->request->getInt('yearID', strftime("%Y"));
 		$month 	= $app->input->request->getInt('monthID', strftime("%m"));
 
@@ -59,7 +57,7 @@ class JemViewCalendar extends JViewLegacy
 		$model->setDate(mktime(0, 0, 1, $month, 1, $year));
 
 		$rows			= $this->get('Items');
-		
+
 		//Set Page title
 		$pagetitle   = $params->def('page_title', $menuitem->title);
 		$params->def('page_heading', $pagetitle);
@@ -94,4 +92,3 @@ class JemViewCalendar extends JViewLegacy
 		parent::display($tpl);
 	}
 }
-?>

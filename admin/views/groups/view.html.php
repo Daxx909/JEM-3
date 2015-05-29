@@ -1,25 +1,23 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 defined('_JEXEC') or die;
 
-
 /**
  * View: Groups
  */
- class JEMViewGroups extends JViewLegacy {
-
+class JEMViewGroups extends JViewLegacy
+{
 	protected $items;
 	protected $pagination;
 	protected $state;
 
-	public function display($tpl = null)
-	{
+    public function display($tpl = null)
+    {
 		$user 		= JFactory::getUser();
 		$jemsettings = JEMAdmin::config();
 
@@ -44,8 +42,7 @@ defined('_JEXEC') or die;
 		$this->addToolbar();
 
 		parent::display($tpl);
-		}
-
+	}
 
 	/**
 	 * Add Toolbar
@@ -78,4 +75,3 @@ defined('_JEXEC') or die;
 		JToolBarHelper::help('listgroups', true);
 	}
 }
-?>

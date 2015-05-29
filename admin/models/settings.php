@@ -1,13 +1,11 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 defined('_JEXEC') or die;
-
 
 /**
  * Model: Settings
@@ -26,13 +24,12 @@ class JEMModelSettings extends JModelForm
 	{
 		// Get the form.
 		$form = $this->loadForm('com_jem.settings', 'settings', array('control' => 'jform', 'load_data' => $loadData));
-		if (empty($form)) {
-			return false;
-		}
+        if (empty($form)) {
+            return false;
+        }
 
-		return $form;
+        return $form;
 	}
-
 
 	/**
 	 * Loading the table data
@@ -60,35 +57,39 @@ class JEMModelSettings extends JModelForm
 		$registryCss = new JRegistry;
 		$registryCss->loadString($data->css);
 		$data->css = $registryCss->toArray();
-		
+
 		// Convert vvenue settings to an array
 		$vvenue = new JRegistry;
 		$vvenue->loadString($data->vvenue);
 		$data->vvenue = $vvenue->toArray();
-		
+
 		// Convert vvenues settings to an array
 		$vvenues = new JRegistry;
 		$vvenues->loadString($data->vvenues);
 		$data->vvenues = $vvenues->toArray();
-		
+
 		# Convert vcategories settings to an array
 		$vvenues = new JRegistry;
 		$vvenues->loadString($data->vcategories);
 		$data->vcategories = $vvenues->toArray();
-		
+
 		# Convert vcategory settings to an array
 		$vvenues = new JRegistry;
 		$vvenues->loadString($data->vcategory);
 		$data->vcategory = $vvenues->toArray();
-		
+
 		# Convert vcategory settings to an array
 		$vcalendar = new JRegistry;
 		$vcalendar->loadString($data->vcalendar);
 		$data->vcalendar = $vcalendar->toArray();
 
+		# Convert veditevent settings to an array
+		$veditevent = new JRegistry;
+		$veditevent->loadString($data->veditevent);
+		$data->veditevent = $veditevent->toArray();
+
 		return $data;
 	}
-
 
 	/**
 	 * Method to get the data that should be injected in the form.
@@ -105,7 +106,6 @@ class JEMModelSettings extends JModelForm
 
 		return $data;
 	}
-
 
 	/**
 	 * Saves the settings
@@ -161,7 +161,6 @@ class JEMModelSettings extends JModelForm
 		$this->setState('params', $params);
 	}
 
-
 	/**
 	 * Return config information
 	 */
@@ -195,16 +194,16 @@ class JEMModelSettings extends JModelForm
 				$gd_version .= ' (' . trim($gd_sup[1]) . ')';
 			}
 		}
-		
+
 		// language conflict detection
-		
+
 		$language = null;
 		# retrieve loaded language files
-		
+
 		$language = JFactory::getLanguage();
-		
+
 		$paths = count($language->getPaths('com_jem'));
-	
+
 		$config 					= new stdClass();
 		$config->vs_component		= JemHelper::getParam(1,'version',1,'com_jem');
 		$config->vs_plg_comments	= JemHelper::getParam(1,'version',2,'plg_jem_comments');
@@ -225,6 +224,4 @@ class JEMModelSettings extends JModelForm
 
 		return $config;
 	}
-	
-
 }

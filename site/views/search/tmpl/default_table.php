@@ -1,12 +1,12 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 defined('_JEXEC') or die;
+
 ?>
 <script type="text/javascript">
 	function tableOrdering(order, dir, view)
@@ -41,7 +41,7 @@ defined('_JEXEC') or die;
 		</tr>
 		<tr>
 		<td>
-		
+
 		<span class="label">End date</span>
 		</td>
 			<td>
@@ -60,7 +60,7 @@ defined('_JEXEC') or die;
 		<td>
 		<span class="label">Continent</span>
 		</td>
-		
+
 			<td>
 			<?php echo $this->lists['continents'];?>
 			</td>
@@ -146,6 +146,19 @@ defined('_JEXEC') or die;
 							$row->enddates, $row->endtimes);
 					?>
 				</td>
+				<?php if (($this->jemsettings->showtitle == 1) && ($this->jemsettings->showdetails == 2)) : ?>
+				<?php if ($this->escape($row->introtext) != "" ) { ?>
+					<td class="jem_title">
+						<a href="<?php echo JRoute::_(JemHelperRoute::getEventRoute($row->slug)); ?>" itemprop="url">
+							<span itemprop="name"><?php echo $this->escape($row->title); ?></span>
+						</a>
+					</td>
+				<?php } else { ?>
+				<td class="jem_title" itemprop="name">
+						<?php echo $this->escape($row->title); ?>
+					</td>
+				<?php } ?>
+				<?php endif; ?>
 				<?php if (($this->jemsettings->showtitle == 1) && ($this->jemsettings->showdetails == 1)) : ?>
 					<td class="jem_title">
 						<a href="<?php echo JRoute::_(JemHelperRoute::getEventRoute($row->slug)); ?>" itemprop="url">

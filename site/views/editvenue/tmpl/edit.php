@@ -1,8 +1,7 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
@@ -67,10 +66,10 @@ jQuery(function() {
 		jQuery("#tmp_form_country").attr("geo-data", "country_short");
 		jQuery("#tmp_form_latitude").attr("geo-data", "lat");
 		jQuery("#tmp_form_longitude").attr("geo-data", "lng");
-		jQuery("#tmp_form_venue").attr("geo-data", "name");	
+		jQuery("#tmp_form_venue").attr("geo-data", "name");
 	}
 
-	function test(){			
+	function test(){
 		var form 		= document.getElementById('venue-form');
 		var map = jQuery('#jform_map');
 		var streetcheck = jQuery(form.jform_street).hasClass('required');
@@ -112,13 +111,13 @@ jQuery(function() {
 		jQuery(form.jform_city).removeClass('required');
 		jQuery(form.jform_country).removeClass('required');
 	}
-	
+
 	jQuery(function(){
 		var chkGeocode = function() {
 		var chk = jQuery( "#geocode:checked" ).length;
 		if (chk) {
 			jQuery("#mapdiv").show();
-		
+
 		jQuery("#geocomplete").geocomplete({
 			map: ".map_canvas",
 			<?php echo $location; ?>
@@ -137,7 +136,7 @@ jQuery(function() {
 		jQuery("#geocomplete").bind('geocode:result', function(){
 				var street = jQuery("#tmp_form_street").val();
 				var route  = jQuery("#tmp_form_route").val();
-				
+
 				if (route) {
 					/* something to add */
 				} else {
@@ -165,7 +164,7 @@ jQuery(function() {
 			jQuery("#jform_street").val(jQuery("#tmp_form_street").val());
 			jQuery("#jform_postalCode").val(jQuery("#tmp_form_postalCode").val());
 			jQuery("#jform_city").val(jQuery("#tmp_form_city").val());
-			jQuery("#jform_state").val(jQuery("#tmp_form_state").val());	
+			jQuery("#jform_state").val(jQuery("#tmp_form_state").val());
 			jQuery("#jform_country").val(jQuery("#tmp_form_country").val());
 		});
 
@@ -180,7 +179,7 @@ jQuery(function() {
 			jQuery("#cp-address").click();
 			jQuery("#cp-latlong").click();
 			jQuery("#cp-venue").click();
-		});	
+		});
 
 		} else {
 			jQuery("#mapdiv").hide();
@@ -202,24 +201,21 @@ jQuery(function() {
 <div id="jem" class="jem_editvenue<?php echo $this->pageclass_sfx; ?>">
 	<div class="edit item-page">
 		<form action="<?php echo JRoute::_('index.php?option=com_jem&a_id='.(int) $this->item->id); ?>" class="form-validate" method="post" name="adminForm" id="venue-form" enctype="multipart/form-data">
-			
+
 <div class="topbox">
-<div class="btn-group pull-left">
-<?php echo JEMOutput::statuslabel($this->item->published); ?>
-</div>
 	<div class="button_flyer">
-		<div class="btn-toolbar">	
+		<div class="btn-toolbar">
 			<?php if (JFactory::getUser()->authorise('core.manage', 'com_jem')) { ?>
 				<button type="button" class="btn btn-small btn-success" onclick="Joomla.submitbutton('editvenue.apply')"><span class="icon-apply icon-white"></span><?php echo ' '.JText::_('JSAVE') ?></button>
 				<button type="button" class="btn btn-small" onclick="Joomla.submitbutton('editvenue.save')"><span class="icon-save"></span><?php echo ' '.JText::_('Save & Close') ?></button>
 			<?php } else { ?>
-				<button type="button" class="btn btn-small btn-success" onclick="Joomla.submitbutton('editvenue.save')"><span class="icon-save"></span><?php echo ' '.JText::_('JSAVE') ?></button>
+				<button type="button" class="btn btn-small btn-success" onclick="Joomla.submitbutton('editvenue.save')"><span class="icon-apply icon-white"></span><?php echo ' '.JText::_('JSAVE') ?></button>
 			<?php } ?>
 			<button type="button" class="btn btn-small" onclick="Joomla.submitbutton('editvenue.cancel')"><span class="icon-cancel icon-red"></span><?php echo ' '.JText::_('JCANCEL') ?></button>
 		</div>
 	</div>
 </div>
-	
+
 		<?php if ($params->get('show_page_heading')) : ?>
 		<h1>
 		<?php echo $this->escape($params->get('page_heading')); ?>
@@ -227,7 +223,7 @@ jQuery(function() {
 		<?php endif; ?>
 
 		<div class="clr"> </div>
-		
+
 			<?php if ($this->params->get('showintrotext')) : ?>
 			<div class="description no_space clearfix">
 				<?php echo $this->params->get('introtext'); ?>
@@ -237,16 +233,17 @@ jQuery(function() {
 
 <!-- TABS -->
 <?php echo JHtml::_('bootstrap.startTabSet', 'myTab', array('active' => 'details')); ?>
-<?php echo JHtml::_('bootstrap.addTab', 'myTab', 'details', JText::_('COM_JEM_EDITVENUE_INFO_TAB', true)); ?>	
-
+<div class="editform_spacer"></div>
+<?php echo JHtml::_('bootstrap.addTab', 'myTab', 'details', JText::_('COM_JEM_EDITVENUE_INFO_TAB', true)); ?>
+<div class="editform_content">
 			<fieldset class="form-horizontal">
 				<legend><?php echo JText::_('COM_JEM_EDITVENUE_DETAILS_LEGEND'); ?></legend>
-					<?php 
-					echo $this->form->renderField('venue'); 
+					<?php
+					echo $this->form->renderField('venue');
 					if (is_null($this->item->id)) {
 						echo $this->form->renderField('alias');
 
-					 } 
+					 }
 					 echo $this->form->renderField('street');
 					 echo $this->form->renderField('postalCode');
 					 echo $this->form->renderField('city');
@@ -254,20 +251,30 @@ jQuery(function() {
 					 echo $this->form->renderField('country');
 					 echo $this->form->renderField('latitude');
 					 echo $this->form->renderField('longitude');
-					 echo $this->form->renderField('url');
 					 echo $this->form->renderField('published');
 					 echo $this->form->renderField('map');
 					 ?>
 			</fieldset>
-			
+
+			<!-- CONTACT DETAILS -->
+			<fieldset class="form-horizontal">
+				<legend><span class="legendcolor"><?php echo JText::_('COM_JEM_CONTACT_DETAILS'); ?></span></legend>
+				<?php foreach($this->form->getFieldset('contact') as $field): ?>
+				<div class="control-group">
+					<div class="control-label"><?php echo $field->label; ?></div>
+					<div class="controls"><?php echo $field->input; ?></div>
+				</div>
+				<?php endforeach; ?>
+			</fieldset>
+
 			<fieldset class="form-vertical">
 			<div class="clr"></div>
 					<?php echo $this->form->getLabel('locdescription'); ?>
 					<div class="clr"><br /></div>
 					<?php echo $this->form->getInput('locdescription'); ?>
-			
+
 			</fieldset>
-			
+
 			<!-- VENUE-GEODATA-->
 			<fieldset class="form-horizontal" id="geodata">
 			<legend><?php echo JText::_('COM_JEM_FIELDSET_GEODATA'); ?></legend>
@@ -275,18 +282,18 @@ jQuery(function() {
 				<div class="control-label"><?php echo $this->form->getLabel('geocode'); ?></div>
 				<div class="controls"> <input type="checkbox" id="geocode" /></div>
 			</div>
-			
+
 			<div class="clr"></div>
 			<div id="mapdiv">
-			<?php 
+			<?php
 			# Google-map code
 			$language	= JFactory::getLanguage();
 			$document	= JFactory::getDocument();
-			
+
 			$api		= trim($this->settings2->get('global_googleapi'));
 			$clientid	= trim($this->settings2->get('global_googleclientid'));
 			$language	= strtolower($language->getTag());
-			
+
 			# do we have a client-ID?
 			if ($clientid) {
 				$document->addScript('http://maps.googleapis.com/maps/api/js?client='.$clientid.'&sensor=false&libraries=places&language='.$language);
@@ -298,9 +305,9 @@ jQuery(function() {
 					$document->addScript('https://maps.googleapis.com/maps/api/js?sensor=false&libraries=places&language='.$language);
 				}
 			}
-			
+
 			JHtml::_('stylesheet', 'com_jem/geostyle.css', array(), true);
-			JHtml::_('script', 'com_jem/jquery.geocomplete.js', false, true);	
+			JHtml::_('script', 'com_jem/jquery.geocomplete.js', false, true);
 			?>
 				<input id="geocomplete" type="text" size="55" placeholder="<?php echo JText::_('COM_JEM_VENUE_ADDRPLACEHOLDER'); ?>" value="" />
 				<input id="find-left" class="btn" type="button" value="<?php echo JText::_('COM_JEM_VENUE_ADDR_FINDVENUEDATA');?>" />
@@ -310,11 +317,11 @@ jQuery(function() {
 				<div class="control-group">
 					<div class="control-label"><label><?php echo JText::_('COM_JEM_STREET'); ?></label></div>
 						<div class="controls"><input type="text" disabled="disabled" class="readonly" id="tmp_form_street" readonly="readonly" /></div>
-					
+
 						<input type="hidden" class="readonly" id="tmp_form_streetnumber" readonly="readonly" />
 						<input type="hidden" class="readonly" id="tmp_form_route" readonly="readonly" />
 					</div>
-						
+
 				<div class="control-group">
 					<div class="control-label"><label><?php echo JText::_('COM_JEM_ZIP'); ?></label></div>
 					<div class="controls"><input type="text" disabled="disabled" class="readonly" id="tmp_form_postalCode" readonly="readonly" /></div>
@@ -327,7 +334,7 @@ jQuery(function() {
 					<div class="control-label"><label><?php echo JText::_('COM_JEM_STATE'); ?></label></div>
 					<div class="controls"><input type="text" disabled="disabled" class="readonly" id="tmp_form_state" readonly="readonly" /></div>
 				</div>
-				<div class="control-group">		
+				<div class="control-group">
 					<div class="control-label"><label><?php echo JText::_('COM_JEM_VENUE'); ?></label></div>
 					<div class="controls"><input type="text" disabled="disabled" class="readonly" id="tmp_form_venue" readonly="readonly" /></div>
 				</div>
@@ -343,7 +350,7 @@ jQuery(function() {
 					<div class="control-label"><label><?php echo JText::_('COM_JEM_LONGITUDE'); ?></label></div>
 					<div class="controls"><input type="text" disabled="disabled" class="readonly" id="tmp_form_longitude" readonly="readonly" /></div>
 				</div>
-				
+
 				<div class="clr"></div>
 				<input id="cp-all" class="btn" type="button" value="<?php echo JText::_('COM_JEM_VENUE_COPY_DATA'); ?>" style="margin-right: 3em;" />
 				<input id="cp-address" class="btn" type="button" value="<?php echo JText::_('COM_JEM_VENUE_COPY_ADDRESS'); ?>" />
@@ -363,20 +370,21 @@ jQuery(function() {
 					</div>
 					<?php endforeach; ?>
 			</fieldset>
+</div>
 			<?php echo JHtml::_('bootstrap.endTab'); ?>
 
 <!-- ATTACHMENTS TAB -->
 			<?php echo JHtml::_('bootstrap.addTab', 'myTab', 'attachments', JText::_('COM_JEM_EDITVENUE_ATTACHMENTS_TAB', true)); ?>
 			<?php echo $this->loadTemplate('attachments'); ?>
 			<?php echo JHtml::_('bootstrap.endTab'); ?>
-			
+
 
 			<!-- OTHER TAB -->
 			<?php echo JHtml::_('bootstrap.addTab', 'myTab', 'other', JText::_('COM_JEM_EDITVENUE_OTHER_TAB', true)); ?>
 			<?php echo $this->loadTemplate('other'); ?>
 			<?php echo JHtml::_('bootstrap.endTab'); ?>
-			<?php 
-			echo JHtml::_('bootstrap.endTabSet'); 
+			<?php
+			echo JHtml::_('bootstrap.endTabSet');
 			?>
 
 			<div class="clearfix"></div>

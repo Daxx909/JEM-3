@@ -1,14 +1,13 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
- * @subpackage JEM Wide Module
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @subpackage JEM - Module-Wide
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
-
 defined('_JEXEC') or die;
+
 JHtml::_('behavior.modal', 'a.flyermodal');
 ?>
 
@@ -73,24 +72,27 @@ JHtml::_('behavior.modal', 'a.flyermodal');
 			</span>
 		</td>
 		<td align="center" class="event-image-cell">
-			<?php if ($params->get('use_modal')) : ?>
-
-			<?php if ($item->eventimageorig) {
-				$image = $item->eventimageorig;
-			} else { $image = ''; }
-			 ?>
-
-			<a href="<?php echo $image; ?>" class="flyermodal" title="<?php echo $item->title; ?>">
+			<?php
+			if ($item->eventimage) {
+				if ($params->get('use_modal')) :
+				if ($item->eventimageorig) {
+					$image = $item->eventimageorig;
+				} else {
+					$image = '';
+				}
+			?>
+				<a href="<?php echo $image; ?>" class="flyermodal" title="<?php echo $item->title; ?>">
 			<?php endif; ?>
-
 				<img src="<?php echo $item->eventimage; ?>" alt="<?php echo $item->title; ?>" class="image-preview" />
-
 			<?php if ($item->eventlink) : ?>
-			</a>
-			<?php endif; ?>
+				</a>
+			<?php
+			endif;
+			}
+			?>
 		</td>
 		<td align="center" class="event-image-cell">
-			<?php if ($params->get('use_modal')) : ?>
+			<?php if ($item->venueimage) { if ($params->get('use_modal')) : ?>
 			<a href="<?php echo $item->venueimageorig; ?>" class="flyermodal" title="<?php echo $item->venue; ?>">
 			<?php endif; ?>
 
@@ -98,7 +100,7 @@ JHtml::_('behavior.modal', 'a.flyermodal');
 
 			<?php if ($item->venuelink) : ?>
 			</a>
-			<?php endif; ?>
+			<?php endif; } ?>
 		</td>
 	</tr>
 <?php endforeach; ?>

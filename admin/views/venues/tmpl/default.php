@@ -1,8 +1,7 @@
 <?php
 /**
- * @version 3.0.3
  * @package JEM
- * @copyright (C) 2013-2014 joomlaeventmanager.net
+ * @copyright (C) 2013-2015 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
@@ -18,10 +17,9 @@ $listDirn	= $this->escape($this->state->get('list.direction'));
 $canOrder	= $user->authorise('core.edit.state', 'com_jem.category');
 $saveOrder	= $listOrder == 'a.ordering';
 
-if ($saveOrder)
-{
-	$saveOrderingUrl = 'index.php?option=com_jem&task=venues.saveOrderAjax&tmpl=component';
-	JHtml::_('sortablelist.sortable', 'eventList', 'adminForm', strtolower($listDirn), $saveOrderingUrl);
+if ($saveOrder) {
+    $saveOrderingUrl = 'index.php?option=com_jem&task=venues.saveOrderAjax&tmpl=component';
+    JHtml::_('sortablelist.sortable', 'eventList', 'adminForm', strtolower($listDirn), $saveOrderingUrl);
 }
 
 $params		= (isset($this->state->params)) ? $this->state->params : new JObject();
@@ -66,7 +64,6 @@ $settings	= $this->settings;
 			<th width="1%" class="center"><?php echo JHtml::_('grid.checkall'); ?></th>
 			<th class="title"><?php echo JHtml::_('searchtools.sort', 'COM_JEM_VENUE', 'a.venue', $listDirn, $listOrder ); ?></th>
 			<th width="20%"><?php echo JHtml::_('searchtools.sort', 'COM_JEM_ALIAS', 'a.alias', $listDirn, $listOrder ); ?></th>
-			<th><?php echo JText::_('COM_JEM_WEBSITE'); ?></th>
 			<th><?php echo JHtml::_('searchtools.sort', 'COM_JEM_CITY', 'a.city', $listDirn, $listOrder ); ?></th>
 			<th><?php echo JHtml::_('searchtools.sort', 'COM_JEM_STATE', 'a.state', $listDirn, $listOrder ); ?></th>
 			<th width="1%"><?php echo JHtml::_('searchtools.sort', 'COM_JEM_COUNTRY', 'a.country', $listDirn, $listOrder ); ?></th>
@@ -120,19 +117,6 @@ $settings	= $this->settings;
 						<?php echo $this->escape(JString::substr($row->alias, 0 , 25)).'...'; ?>
 					<?php else : ?>
 						<?php echo $this->escape($row->alias); ?>
-					<?php endif; ?>
-				</td>
-				<td align="left">
-					<?php if ($row->url) : ?>
-						<a href="<?php echo $this->escape($row->url); ?>" target="_blank">
-							<?php if (JString::strlen($row->url) > 25) : ?>
-								<?php echo $this->escape(JString::substr($row->url, 0 , 25)).'...'; ?>
-							<?php else : ?>
-								<?php echo $this->escape($row->url); ?>
-							<?php endif; ?>
-						</a>
-					<?php else : ?>
-						-
 					<?php endif; ?>
 				</td>
 				<td align="left" class="city"><?php echo $row->city ? $this->escape($row->city) : '-'; ?></td>
